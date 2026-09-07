@@ -81,6 +81,7 @@ export const signUp = createServerFn({ method: 'POST' })
       password: input.password,
       options: {
         data: { full_name: input.fullName },
+        emailRedirectTo: `${getOrigin()}/login`,
       },
     })
 
