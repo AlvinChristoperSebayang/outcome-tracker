@@ -12,6 +12,14 @@
   "includeExamples": true,
   "routerOnly": false,
   "version": 1,
+  "addOns": true,
   "framework": "react",
-  "chosenAddOns": ["shadcn", "form", "table", "tanstack-query", "eslint"]
+  "chosenAddOns": [
+    "shadcn",
+    "form",
+    "table",
+    "tanstack-query",
+    "eslint",
+    "vercel"
+  ]
 }
