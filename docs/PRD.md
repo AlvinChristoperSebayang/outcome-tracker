@@ -376,3 +376,27 @@ Setiap phase dikerjakan bertahap — tidak membangun seluruh aplikasi dalam satu
 
 - Library PDF export spesifik akan ditentukan saat Phase 5 (kandidat: `@react-pdf/renderer`, `jspdf`).
 - Tidak ada fitur di luar MVP (lihat §4.2) — permintaan penambahan fitur harus ditolak/dipisahkan ke roadmap berikutnya, bukan disisipkan ke scope ini.
+
+---
+
+## 16. Addendum — Anggaran & Hutang (di luar MVP awal, ditambahkan atas permintaan eksplisit)
+
+Fitur ini melampaui batasan §4.2 (budgeting/income management awalnya dikecualikan), ditambahkan setelah MVP berjalan atas permintaan langsung pemilik produk.
+
+**Halaman `/anggaran`** (nav baru, sejajar Pengeluaran & Laporan), dua tab:
+
+**Tab Kantong Anggaran** — per bulan:
+
+- Catat total Pemasukan bulan itu.
+- Buat "kantong" (mis. Kebutuhan Sehari-hari, Tabungan) dengan alokasi berupa jumlah tetap atau persentase dari pemasukan.
+- Form Tambah/Ubah Pengeluaran mendapat field baru "Kantong Anggaran (opsional)" — **berjalan bersamaan** dengan Kategori (kategori untuk breakdown laporan, kantong untuk kontrol budget). Field ini hanya muncul jika bulan pengeluaran tersebut punya kantong anggaran.
+- Jika pengeluaran akan membuat kantong melebihi alokasinya, tampilkan warning inline non-blocking — pengeluaran tetap bisa disimpan.
+
+**Tab Hutang** — model satu arah (uang yang harus dibayar user):
+
+- Catat hutang: nama, jumlah total, jatuh tempo opsional.
+- Catat cicilan/pembayaran sebagian, berulang, sampai sisa mencapai 0.
+- Status "Belum Lunas" tetap tampil lintas bulan sampai lunas; setelah lunas berubah jadi badge "Lunas" (hijau), record tetap ada (tidak auto-terhapus).
+- Pembayaran cicilan **ikut terhitung** ke "Total Pengeluaran" & "Jumlah Transaksi" di Ringkasan/Laporan bulan pembayaran itu terjadi (sebagai kategori sintetis "Cicilan Hutang" khusus untuk breakdown — tidak menambah 9 kategori pengeluaran resmi, dan tidak muncul di tabel/list Pengeluaran biasa).
+
+**Skema tambahan:** `budgets` (1 per user per bulan), `budget_pockets`, `debts`, `debt_payments`, plus kolom `expenses.pocket_id` (nullable). Lihat [db/migrations/0002_budget_and_debt.sql](../db/migrations/0002_budget_and_debt.sql) — wajib dijalankan di Supabase SQL Editor sebelum fitur ini berfungsi.

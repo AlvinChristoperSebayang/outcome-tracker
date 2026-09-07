@@ -76,6 +76,15 @@ export function getMonthRange(monthValue: string): DateRange {
   return { from: startOfMonth(date), to: endOfMonth(date) }
 }
 
+/** "2026-09" -> "2026-09-01", matching how budgets.month (a DATE column) is stored. */
+export function monthValueToDateOnly(monthValue: string): string {
+  return `${monthValue}-01`
+}
+
+export function currentMonthValue(): string {
+  return format(new Date(), 'yyyy-MM')
+}
+
 export const PERIOD_LABELS: Record<PeriodPreset, string> = {
   'hari-ini': 'Hari ini',
   'minggu-ini': 'Minggu ini',

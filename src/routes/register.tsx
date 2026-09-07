@@ -1,5 +1,10 @@
 import { useState } from 'react'
-import { createFileRoute, Link, redirect, useNavigate } from '@tanstack/react-router'
+import {
+  createFileRoute,
+  Link,
+  redirect,
+  useNavigate,
+} from '@tanstack/react-router'
 import { useForm } from '@tanstack/react-form'
 import { CheckCircle2 } from 'lucide-react'
 import { AuthCard } from '#/components/auth/AuthCard'
@@ -27,7 +32,12 @@ function RegisterPage() {
   const [needsConfirmation, setNeedsConfirmation] = useState(false)
 
   const form = useForm({
-    defaultValues: { fullName: '', email: '', password: '', confirmPassword: '' },
+    defaultValues: {
+      fullName: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+    },
     onSubmit: async ({ value }) => {
       setFormError(null)
       if (value.password !== value.confirmPassword) {
@@ -64,8 +74,8 @@ function RegisterPage() {
         <div className="flex flex-col items-center gap-3 py-4 text-center">
           <CheckCircle2 className="h-10 w-10 text-success" aria-hidden="true" />
           <p className="text-sm text-muted-foreground">
-            Pendaftaran berhasil. Kami sudah mengirim tautan konfirmasi ke email Anda — silakan
-            klik tautan tersebut sebelum masuk.
+            Pendaftaran berhasil. Kami sudah mengirim tautan konfirmasi ke email
+            Anda — silakan klik tautan tersebut sebelum masuk.
           </p>
         </div>
       </AuthCard>
@@ -92,7 +102,10 @@ function RegisterPage() {
           form.handleSubmit()
         }}
       >
-        <form.Field name="fullName" validators={{ onSubmit: registerBaseSchema.shape.fullName }}>
+        <form.Field
+          name="fullName"
+          validators={{ onSubmit: registerBaseSchema.shape.fullName }}
+        >
           {(field) => (
             <div className="space-y-1.5">
               <Label htmlFor={field.name}>Nama Lengkap</Label>
@@ -109,7 +122,10 @@ function RegisterPage() {
           )}
         </form.Field>
 
-        <form.Field name="email" validators={{ onSubmit: registerBaseSchema.shape.email }}>
+        <form.Field
+          name="email"
+          validators={{ onSubmit: registerBaseSchema.shape.email }}
+        >
           {(field) => (
             <div className="space-y-1.5">
               <Label htmlFor={field.name}>Email</Label>
@@ -127,7 +143,10 @@ function RegisterPage() {
           )}
         </form.Field>
 
-        <form.Field name="password" validators={{ onSubmit: registerBaseSchema.shape.password }}>
+        <form.Field
+          name="password"
+          validators={{ onSubmit: registerBaseSchema.shape.password }}
+        >
           {(field) => (
             <div className="space-y-1.5">
               <Label htmlFor={field.name}>Kata Sandi</Label>
@@ -164,7 +183,9 @@ function RegisterPage() {
           )}
         </form.Field>
 
-        {formError ? <p className="text-sm text-destructive">{formError}</p> : null}
+        {formError ? (
+          <p className="text-sm text-destructive">{formError}</p>
+        ) : null}
 
         <Button type="submit" className="w-full" disabled={signUp.isPending}>
           Daftar

@@ -1,5 +1,6 @@
 import { queryOptions } from '@tanstack/react-query'
-import { fetchExpenses } from '#/lib/queries/expenses'
+import { fetchDebtPaymentsInRange } from '#/lib/queries/debts'
+import { fetchExpenses, resolveDateRange } from '#/lib/queries/expenses'
 import { computeSummary } from '#/lib/utils/expense-stats'
 import type { PeriodPreset } from '#/types/expense'
 
@@ -14,8 +15,12 @@ export function dashboardSummaryQueryOptions(filters: DashboardFilters) {
   return queryOptions({
     queryKey: ['expense-summary', filters],
     queryFn: async () => {
-      const expenses = await fetchExpenses({ ...filters, kategori: 'semua' })
-      return computeSummary(expenses)
+      const { from, to } = resolveDateRange(filters)
+      const [expenses, debtPayments] = await Promise.all([
+        fetchExpenses({ ...filters, kategori: 'semua' }),
+        fetchDebtPaymentsInRange(from, to),
+      ])
+      return computeSummary(expenses, debtPayments)
     },
     staleTime: 30_000,
   })

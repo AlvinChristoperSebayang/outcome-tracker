@@ -120,7 +120,10 @@ export const sendPasswordResetEmail = createServerFn({ method: 'POST' })
     if (error) {
       return {
         success: false as const,
-        message: getEmailErrorMessage(error, 'Gagal mengirim tautan reset. Silakan coba lagi.'),
+        message: getEmailErrorMessage(
+          error,
+          'Gagal mengirim tautan reset. Silakan coba lagi.',
+        ),
       }
     }
     return { success: true as const }

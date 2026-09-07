@@ -1,5 +1,8 @@
 import { useEffect } from 'react'
 import { useForm } from '@tanstack/react-form'
+import { useQuery } from '@tanstack/react-query'
+import { format } from 'date-fns'
+import { AlertTriangle } from 'lucide-react'
 import { toast } from 'sonner'
 import { DatePicker } from '#/components/DatePicker'
 import { FieldError } from '#/components/FieldError'
@@ -23,10 +26,16 @@ import {
 } from '#/components/ui/select'
 import { Textarea } from '#/components/ui/textarea'
 import { useCreateExpense, useUpdateExpense } from '#/lib/mutations/expenses'
-import { formatNumberInput, parseNumberInput } from '#/lib/utils/currency'
-import { todayDateOnlyString } from '#/lib/utils/date'
+import { monthlyBudgetQueryOptions } from '#/lib/queries/budgets'
+import {
+  formatCurrency,
+  formatNumberInput,
+  parseNumberInput,
+} from '#/lib/utils/currency'
+import { parseDateOnly, todayDateOnlyString } from '#/lib/utils/date'
 import { expenseSchema } from '#/lib/validations/expense'
 import { EXPENSE_CATEGORIES } from '#/types/expense'
+import type { BudgetPocketWithSpending } from '#/types/budget'
 import type { ExpenseRow } from '#/types/expense'
 
 interface ExpenseFormDialogProps {
@@ -53,6 +62,7 @@ export function ExpenseFormDialog({
         (typeof EXPENSE_CATEGORIES)[number] | '',
       expenseDate: expense?.expense_date ?? todayDateOnlyString(),
       notes: expense?.notes ?? '',
+      pocketId: expense?.pocket_id ?? '',
     },
     onSubmit: async ({ value }) => {
       const parsed = expenseSchema.parse(value)
@@ -87,6 +97,7 @@ export function ExpenseFormDialog({
           (typeof EXPENSE_CATEGORIES)[number] | '',
         expenseDate: expense?.expense_date ?? todayDateOnlyString(),
         notes: expense?.notes ?? '',
+        pocketId: expense?.pocket_id ?? '',
       })
     }
   }, [open, expense, form])
@@ -229,6 +240,86 @@ export function ExpenseFormDialog({
               )}
             </form.Field>
           </div>
+
+          <form.Subscribe
+            selector={(state) =>
+              [state.values.expenseDate, state.values.amount] as const
+            }
+          >
+            {([expenseDate, amount]) => {
+              const monthValue = format(parseDateOnly(expenseDate), 'yyyy-MM')
+              const budgetQuery = useQuery(
+                monthlyBudgetQueryOptions(monthValue),
+              )
+              const pockets = budgetQuery.data?.pockets ?? []
+
+              if (pockets.length === 0) return null
+
+              return (
+                <form.Field name="pocketId">
+                  {(field) => {
+                    const selectedPocket = pockets.find(
+                      (pocket: BudgetPocketWithSpending) =>
+                        pocket.id === field.state.value,
+                    )
+                    const alreadyCountedAmount =
+                      expense && expense.pocket_id === field.state.value
+                        ? Number(expense.amount)
+                        : 0
+                    const projectedSpent = selectedPocket
+                      ? selectedPocket.spent -
+                        alreadyCountedAmount +
+                        (amount || 0)
+                      : 0
+                    const willExceed =
+                      Boolean(selectedPocket) &&
+                      projectedSpent > Number(selectedPocket!.amount)
+
+                    return (
+                      <div className="space-y-1.5">
+                        <Label htmlFor={field.name}>
+                          Kantong Anggaran (opsional)
+                        </Label>
+                        <Select
+                          value={field.state.value || 'tanpa-kantong'}
+                          onValueChange={(value) =>
+                            field.handleChange(
+                              value === 'tanpa-kantong' ? '' : value,
+                            )
+                          }
+                        >
+                          <SelectTrigger id={field.name} className="w-full">
+                            <SelectValue placeholder="Tanpa kantong" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="tanpa-kantong">
+                              Tanpa kantong
+                            </SelectItem>
+                            {pockets.map((pocket: BudgetPocketWithSpending) => (
+                              <SelectItem key={pocket.id} value={pocket.id}>
+                                {pocket.name} · Sisa{' '}
+                                {formatCurrency(pocket.remaining)}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        {willExceed && (
+                          <p className="flex items-center gap-1.5 text-sm text-destructive">
+                            <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+                            Melebihi anggaran kantong &quot;
+                            {selectedPocket!.name}&quot; sebesar{' '}
+                            {formatCurrency(
+                              projectedSpent - Number(selectedPocket!.amount),
+                            )}
+                          </p>
+                        )}
+                      </div>
+                    )
+                  }}
+                </form.Field>
+              )
+            }}
+          </form.Subscribe>
 
           <form.Field name="notes">
             {(field) => (

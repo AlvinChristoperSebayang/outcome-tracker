@@ -11,6 +11,7 @@ export const expenseSchema = z.object({
   }),
   expenseDate: z.string().min(1, 'Tanggal wajib diisi.'),
   notes: z.string().optional(),
+  pocketId: z.string().optional(),
 })
 
 export type ExpenseInput = z.infer<typeof expenseSchema>

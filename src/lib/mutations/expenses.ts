@@ -11,6 +11,7 @@ function toRow(input: ExpenseInput, userId: string) {
     category: input.category,
     expense_date: input.expenseDate,
     notes: input.notes || null,
+    pocket_id: input.pocketId || null,
   }
 }
 
@@ -44,6 +45,7 @@ async function updateExpense(
       category: input.category,
       expense_date: input.expenseDate,
       notes: input.notes || null,
+      pocket_id: input.pocketId || null,
     })
     .eq('id', id)
     .select()
@@ -65,6 +67,7 @@ function useInvalidateExpenseQueries() {
     queryClient.invalidateQueries({ queryKey: ['expenses'] })
     queryClient.invalidateQueries({ queryKey: ['expense-summary'] })
     queryClient.invalidateQueries({ queryKey: ['report'] })
+    queryClient.invalidateQueries({ queryKey: ['budget'] })
   }
 }
 

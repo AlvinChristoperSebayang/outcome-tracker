@@ -1,7 +1,10 @@
 import { format } from 'date-fns'
 import { id } from 'date-fns/locale'
 import { parseDateOnly } from '#/lib/utils/date'
+import type { DebtPaymentRow } from '#/types/debt'
 import type { ExpenseRow } from '#/types/expense'
+
+const DEBT_PAYMENT_CATEGORY = 'Cicilan Hutang'
 
 export interface ExpenseSummary {
   total: number
@@ -10,14 +13,23 @@ export interface ExpenseSummary {
   topCategory: string | null
 }
 
-export function computeSummary(expenses: Array<ExpenseRow>): ExpenseSummary {
-  const total = expenses.reduce(
+export function computeSummary(
+  expenses: Array<ExpenseRow>,
+  debtPayments: Array<DebtPaymentRow> = [],
+): ExpenseSummary {
+  const expenseTotal = expenses.reduce(
     (sum, expense) => sum + Number(expense.amount),
     0,
   )
-  const count = expenses.length
+  const debtTotal = debtPayments.reduce(
+    (sum, payment) => sum + Number(payment.amount),
+    0,
+  )
+  const total = expenseTotal + debtTotal
+  const count = expenses.length + debtPayments.length
   const average = count > 0 ? total / count : 0
-  const topCategory = computeCategoryBreakdown(expenses)[0]?.category ?? null
+  const topCategory =
+    computeCategoryBreakdown(expenses, debtPayments)[0]?.category ?? null
 
   return { total, count, average, topCategory }
 }
@@ -30,6 +42,7 @@ export interface CategoryBreakdownItem {
 
 export function computeCategoryBreakdown(
   expenses: Array<ExpenseRow>,
+  debtPayments: Array<DebtPaymentRow> = [],
 ): Array<CategoryBreakdownItem> {
   const totals = new Map<string, number>()
   let grandTotal = 0
@@ -38,6 +51,18 @@ export function computeCategoryBreakdown(
     const amount = Number(expense.amount)
     totals.set(expense.category, (totals.get(expense.category) ?? 0) + amount)
     grandTotal += amount
+  }
+
+  if (debtPayments.length > 0) {
+    const debtTotal = debtPayments.reduce(
+      (sum, payment) => sum + Number(payment.amount),
+      0,
+    )
+    totals.set(
+      DEBT_PAYMENT_CATEGORY,
+      (totals.get(DEBT_PAYMENT_CATEGORY) ?? 0) + debtTotal,
+    )
+    grandTotal += debtTotal
   }
 
   return Array.from(totals.entries())
@@ -59,16 +84,24 @@ export interface TimeSeriesPoint {
 export function computeTimeSeries(
   expenses: Array<ExpenseRow>,
   granularity: 'day' | 'month',
+  debtPayments: Array<DebtPaymentRow> = [],
 ): Array<TimeSeriesPoint> {
   const totals = new Map<string, number>()
 
-  for (const expense of expenses) {
-    const date = parseDateOnly(expense.expense_date)
+  const addAmount = (dateValue: string, amount: number) => {
+    const date = parseDateOnly(dateValue)
     const key =
       granularity === 'day'
         ? format(date, 'yyyy-MM-dd')
         : format(date, 'yyyy-MM')
-    totals.set(key, (totals.get(key) ?? 0) + Number(expense.amount))
+    totals.set(key, (totals.get(key) ?? 0) + amount)
+  }
+
+  for (const expense of expenses) {
+    addAmount(expense.expense_date, Number(expense.amount))
+  }
+  for (const payment of debtPayments) {
+    addAmount(payment.payment_date, Number(payment.amount))
   }
 
   return Array.from(totals.entries())
