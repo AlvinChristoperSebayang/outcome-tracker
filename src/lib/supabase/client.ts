@@ -7,8 +7,8 @@ let browserClient: ReturnType<typeof createBrowserClient<Database>> | undefined
 export function getSupabaseBrowserClient() {
   if (!browserClient) {
     browserClient = createBrowserClient<Database>(
-      import.meta.env.VITE_SUPABASE_URL,
-      import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+      import.meta.env.SUPABASE_URL,
+      import.meta.env.SUPABASE_PUBLISHABLE_KEY,
     )
   }
   return browserClient

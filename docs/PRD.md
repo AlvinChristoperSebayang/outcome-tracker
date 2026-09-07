@@ -329,9 +329,11 @@ Setiap mutation (create/update/delete) memicu `invalidateQueries` pada query ter
 ## 12. Environment Variables
 
 ```env
-VITE_SUPABASE_URL=
-VITE_SUPABASE_PUBLISHABLE_KEY=
+SUPABASE_URL=
+SUPABASE_PUBLISHABLE_KEY=
 ```
+
+Tanpa prefix `VITE_` — dipetakan lewat `envPrefix` di `vite.config.ts` agar tetap ter-bundle ke client tanpa memicu peringatan "public framework prefix" di Vercel.
 
 (Disesuaikan dengan konvensi resmi TanStack Start bila berbeda.) `.env` tidak boleh di-commit.
 

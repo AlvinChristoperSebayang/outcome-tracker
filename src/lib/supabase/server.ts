@@ -17,8 +17,8 @@ import type { Database } from '#/types/database.types'
  */
 export const getSupabaseServerClient = createServerOnlyFn(() => {
   return createServerClient<Database>(
-    import.meta.env.VITE_SUPABASE_URL,
-    import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+    import.meta.env.SUPABASE_URL,
+    import.meta.env.SUPABASE_PUBLISHABLE_KEY,
     {
       cookies: {
         getAll() {

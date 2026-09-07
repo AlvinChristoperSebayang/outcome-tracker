@@ -27,9 +27,11 @@ cp .env.example .env
 ```
 
 ```env
-VITE_SUPABASE_URL=https://xxxxxxxx.supabase.co
-VITE_SUPABASE_PUBLISHABLE_KEY=eyJxxxxxxxxxxxx
+SUPABASE_URL=https://xxxxxxxx.supabase.co
+SUPABASE_PUBLISHABLE_KEY=eyJxxxxxxxxxxxx
 ```
+
+Variabel ini tidak memakai prefix `VITE_` — sengaja dipetakan lewat `envPrefix` di [vite.config.ts](vite.config.ts) supaya tetap ter-bundle ke client, tanpa memicu peringatan "public framework prefix" di dashboard Vercel (nilainya memang aman untuk publik — keamanan sebenarnya berasal dari Row Level Security).
 
 ### 4. (Opsional) Generate typed database types
 
