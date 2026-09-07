@@ -1,4 +1,4 @@
-# Pencatatan Pengeluaran
+# Vinance
 
 Aplikasi personal expense tracker — catat pengeluaran, kategorikan, lihat ringkasan, filter, dan buat laporan. Lihat [docs/PRD.md](docs/PRD.md) untuk spesifikasi produk lengkap.
 

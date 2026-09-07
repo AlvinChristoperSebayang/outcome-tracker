@@ -1,4 +1,5 @@
-import { LogOut, Wallet } from 'lucide-react'
+import { LogOut } from 'lucide-react'
+import vinanceLogo from '#/assets/vinance-logo.png'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,12 +22,7 @@ export function MobileHeader({
 
   return (
     <header className="flex h-14 items-center justify-between border-b border-border bg-background px-4 md:hidden">
-      <div className="flex items-center gap-2">
-        <Wallet className="h-5 w-5 text-primary" aria-hidden="true" />
-        <span className="text-sm font-semibold tracking-tight">
-          Pencatatan Pengeluaran
-        </span>
-      </div>
+      <img src={vinanceLogo} alt="Vinance" className="h-6 w-auto" />
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>

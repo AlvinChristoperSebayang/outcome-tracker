@@ -1,5 +1,6 @@
 import { Link } from '@tanstack/react-router'
-import { LogOut, Wallet } from 'lucide-react'
+import { LogOut } from 'lucide-react'
+import vinanceLogo from '#/assets/vinance-logo.png'
 import { cn } from '#/lib/utils'
 import { NAV_ITEMS, SETTINGS_ITEM } from './nav-items'
 import type { SessionUser } from '#/lib/auth'
@@ -19,11 +20,8 @@ export function Sidebar({
 }) {
   return (
     <aside className="hidden w-64 shrink-0 flex-col border-r border-border bg-sidebar md:flex">
-      <div className="flex h-16 items-center gap-2 border-b border-border px-5">
-        <Wallet className="h-5 w-5 text-primary" aria-hidden="true" />
-        <span className="text-sm font-semibold tracking-tight text-sidebar-foreground">
-          Pencatatan Pengeluaran
-        </span>
+      <div className="flex h-16 items-center border-b border-border px-5">
+        <img src={vinanceLogo} alt="Vinance" className="h-7 w-auto" />
       </div>
 
       <nav

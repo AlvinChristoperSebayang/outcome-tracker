@@ -7,6 +7,7 @@ import {
 } from '@tanstack/react-router'
 import { useForm } from '@tanstack/react-form'
 import { AuthCard } from '#/components/auth/AuthCard'
+import { GoogleAuthButton } from '#/components/auth/GoogleAuthButton'
 import { FieldError } from '#/components/FieldError'
 import { PasswordInput } from '#/components/PasswordInput'
 import { Button } from '#/components/ui/button'
@@ -115,6 +116,13 @@ function LoginPage() {
         <Button type="submit" className="w-full" disabled={signIn.isPending}>
           Masuk
         </Button>
+
+        <div className="relative py-1 text-center text-xs text-muted-foreground">
+          <span className="relative z-10 bg-card px-2">atau</span>
+          <div className="absolute inset-x-0 top-1/2 border-t border-border" />
+        </div>
+
+        <GoogleAuthButton label="Masuk dengan Google" />
       </form>
     </AuthCard>
   )

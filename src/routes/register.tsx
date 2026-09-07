@@ -8,6 +8,7 @@ import {
 import { useForm } from '@tanstack/react-form'
 import { CheckCircle2 } from 'lucide-react'
 import { AuthCard } from '#/components/auth/AuthCard'
+import { GoogleAuthButton } from '#/components/auth/GoogleAuthButton'
 import { FieldError } from '#/components/FieldError'
 import { PasswordInput } from '#/components/PasswordInput'
 import { Button } from '#/components/ui/button'
@@ -190,6 +191,13 @@ function RegisterPage() {
         <Button type="submit" className="w-full" disabled={signUp.isPending}>
           Daftar
         </Button>
+
+        <div className="relative py-1 text-center text-xs text-muted-foreground">
+          <span className="relative z-10 bg-card px-2">atau</span>
+          <div className="absolute inset-x-0 top-1/2 border-t border-border" />
+        </div>
+
+        <GoogleAuthButton label="Daftar dengan Google" />
       </form>
     </AuthCard>
   )

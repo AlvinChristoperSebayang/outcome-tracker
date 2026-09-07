@@ -1,4 +1,4 @@
-import { Wallet } from 'lucide-react'
+import vinanceLogo from '#/assets/vinance-logo.png'
 
 export function AuthCard({
   title,
@@ -14,11 +14,8 @@ export function AuthCard({
   return (
     <div className="flex min-h-screen items-center justify-center bg-muted/40 px-4 py-10">
       <div className="w-full max-w-sm">
-        <div className="mb-6 flex items-center justify-center gap-2">
-          <Wallet className="h-6 w-6 text-primary" aria-hidden="true" />
-          <span className="text-sm font-semibold tracking-tight">
-            Pencatatan Pengeluaran
-          </span>
+        <div className="mb-6 flex items-center justify-center">
+          <img src={vinanceLogo} alt="Vinance" className="h-9 w-auto" />
         </div>
 
         <div className="rounded-xl border border-border bg-card p-6 shadow-sm sm:p-8">
