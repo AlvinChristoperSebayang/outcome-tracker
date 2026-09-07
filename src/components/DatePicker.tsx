@@ -9,7 +9,7 @@ import {
 } from '#/components/ui/popover'
 import { cn } from '#/lib/utils'
 import {
-  formatDateLong,
+  formatDateNumeric,
   parseDateOnly,
   toDateOnlyString,
 } from '#/lib/utils/date'
@@ -39,12 +39,14 @@ export function DatePicker({
           variant="outline"
           disabled={disabled}
           className={cn(
-            'w-full justify-start font-normal',
+            'w-full justify-start overflow-hidden font-normal',
             !value && 'text-muted-foreground',
           )}
         >
-          <CalendarIcon className="h-4 w-4" />
-          {value ? formatDateLong(selected!) : placeholder}
+          <CalendarIcon className="h-4 w-4 shrink-0" />
+          <span className="truncate">
+            {value ? formatDateNumeric(selected!) : placeholder}
+          </span>
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">

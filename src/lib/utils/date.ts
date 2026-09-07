@@ -38,6 +38,12 @@ export function formatDateShort(value: string | Date): string {
   return format(date, 'd MMM yyyy', { locale: id })
 }
 
+/** "08-08-2026" — compact numeric form, used where space is tight (e.g. date pickers on mobile). */
+export function formatDateNumeric(value: string | Date): string {
+  const date = typeof value === 'string' ? parseDateOnly(value) : value
+  return format(date, 'dd-MM-yyyy')
+}
+
 export function getPeriodRange(
   preset: PeriodPreset,
   custom?: { from?: string; to?: string },
