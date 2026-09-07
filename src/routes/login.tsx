@@ -8,6 +8,7 @@ import {
 import { useForm } from '@tanstack/react-form'
 import { AuthCard } from '#/components/auth/AuthCard'
 import { FieldError } from '#/components/FieldError'
+import { PasswordInput } from '#/components/PasswordInput'
 import { Button } from '#/components/ui/button'
 import { Input } from '#/components/ui/input'
 import { Label } from '#/components/ui/label'
@@ -94,9 +95,8 @@ function LoginPage() {
           {(field) => (
             <div className="space-y-1.5">
               <Label htmlFor={field.name}>Kata Sandi</Label>
-              <Input
+              <PasswordInput
                 id={field.name}
-                type="password"
                 autoComplete="current-password"
                 value={field.state.value}
                 onBlur={field.handleBlur}

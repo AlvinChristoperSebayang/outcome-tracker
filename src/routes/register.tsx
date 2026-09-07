@@ -1,14 +1,10 @@
 import { useState } from 'react'
-import {
-  createFileRoute,
-  Link,
-  redirect,
-  useNavigate,
-} from '@tanstack/react-router'
+import { createFileRoute, Link, redirect, useNavigate } from '@tanstack/react-router'
 import { useForm } from '@tanstack/react-form'
-import { toast } from 'sonner'
+import { CheckCircle2 } from 'lucide-react'
 import { AuthCard } from '#/components/auth/AuthCard'
 import { FieldError } from '#/components/FieldError'
+import { PasswordInput } from '#/components/PasswordInput'
 import { Button } from '#/components/ui/button'
 import { Input } from '#/components/ui/input'
 import { Label } from '#/components/ui/label'
@@ -28,14 +24,10 @@ function RegisterPage() {
   const navigate = useNavigate()
   const signUp = useSignUp()
   const [formError, setFormError] = useState<string | null>(null)
+  const [needsConfirmation, setNeedsConfirmation] = useState(false)
 
   const form = useForm({
-    defaultValues: {
-      fullName: '',
-      email: '',
-      password: '',
-      confirmPassword: '',
-    },
+    defaultValues: { fullName: '', email: '', password: '', confirmPassword: '' },
     onSubmit: async ({ value }) => {
       setFormError(null)
       if (value.password !== value.confirmPassword) {
@@ -44,17 +36,41 @@ function RegisterPage() {
       }
       try {
         const result = await signUp.mutateAsync(value)
-        if (result.success) {
-          toast.success('Pendaftaran berhasil. Silakan masuk.')
-          navigate({ to: '/dashboard' })
-        } else {
+        if (!result.success) {
           setFormError(result.message)
+          return
+        }
+        if (result.needsConfirmation) {
+          setNeedsConfirmation(true)
+        } else {
+          navigate({ to: '/dashboard' })
         }
       } catch {
         setFormError('Pendaftaran gagal. Silakan coba lagi.')
       }
     },
   })
+
+  if (needsConfirmation) {
+    return (
+      <AuthCard
+        title="Cek Email Anda"
+        footer={
+          <Link to="/login" className="text-primary hover:underline">
+            Kembali ke halaman masuk
+          </Link>
+        }
+      >
+        <div className="flex flex-col items-center gap-3 py-4 text-center">
+          <CheckCircle2 className="h-10 w-10 text-success" aria-hidden="true" />
+          <p className="text-sm text-muted-foreground">
+            Pendaftaran berhasil. Kami sudah mengirim tautan konfirmasi ke email Anda — silakan
+            klik tautan tersebut sebelum masuk.
+          </p>
+        </div>
+      </AuthCard>
+    )
+  }
 
   return (
     <AuthCard
@@ -76,10 +92,7 @@ function RegisterPage() {
           form.handleSubmit()
         }}
       >
-        <form.Field
-          name="fullName"
-          validators={{ onSubmit: registerBaseSchema.shape.fullName }}
-        >
+        <form.Field name="fullName" validators={{ onSubmit: registerBaseSchema.shape.fullName }}>
           {(field) => (
             <div className="space-y-1.5">
               <Label htmlFor={field.name}>Nama Lengkap</Label>
@@ -96,10 +109,7 @@ function RegisterPage() {
           )}
         </form.Field>
 
-        <form.Field
-          name="email"
-          validators={{ onSubmit: registerBaseSchema.shape.email }}
-        >
+        <form.Field name="email" validators={{ onSubmit: registerBaseSchema.shape.email }}>
           {(field) => (
             <div className="space-y-1.5">
               <Label htmlFor={field.name}>Email</Label>
@@ -117,16 +127,12 @@ function RegisterPage() {
           )}
         </form.Field>
 
-        <form.Field
-          name="password"
-          validators={{ onSubmit: registerBaseSchema.shape.password }}
-        >
+        <form.Field name="password" validators={{ onSubmit: registerBaseSchema.shape.password }}>
           {(field) => (
             <div className="space-y-1.5">
               <Label htmlFor={field.name}>Kata Sandi</Label>
-              <Input
+              <PasswordInput
                 id={field.name}
-                type="password"
                 autoComplete="new-password"
                 value={field.state.value}
                 onBlur={field.handleBlur}
@@ -145,9 +151,8 @@ function RegisterPage() {
           {(field) => (
             <div className="space-y-1.5">
               <Label htmlFor={field.name}>Konfirmasi Kata Sandi</Label>
-              <Input
+              <PasswordInput
                 id={field.name}
-                type="password"
                 autoComplete="new-password"
                 value={field.state.value}
                 onBlur={field.handleBlur}
@@ -159,9 +164,7 @@ function RegisterPage() {
           )}
         </form.Field>
 
-        {formError ? (
-          <p className="text-sm text-destructive">{formError}</p>
-        ) : null}
+        {formError ? <p className="text-sm text-destructive">{formError}</p> : null}
 
         <Button type="submit" className="w-full" disabled={signUp.isPending}>
           Daftar

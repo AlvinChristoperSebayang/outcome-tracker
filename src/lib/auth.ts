@@ -11,6 +11,7 @@ import {
   registerSchema,
   resetPasswordSchema,
 } from '#/lib/validations/auth'
+import type { AuthError } from '@supabase/supabase-js'
 
 export interface SessionUser {
   id: string
@@ -20,6 +21,14 @@ export interface SessionUser {
 
 function getOrigin(): string {
   return `${getRequestProtocol()}://${getRequestHost()}`
+}
+
+/** Maps known Supabase Auth error codes to an honest, user-facing message. */
+function getEmailErrorMessage(error: AuthError, fallback: string): string {
+  if (error.code === 'over_email_send_rate_limit') {
+    return 'Terlalu banyak percobaan dalam waktu singkat. Silakan coba lagi dalam beberapa menit.'
+  }
+  return fallback
 }
 
 export const getCurrentUser = createServerFn({ method: 'GET' }).handler(
@@ -65,13 +74,13 @@ export const signIn = createServerFn({ method: 'POST' })
 
 export const signUp = createServerFn({ method: 'POST' })
   .validator(registerSchema)
-  .handler(async ({ data }) => {
+  .handler(async ({ data: input }) => {
     const supabase = getSupabaseServerClient()
-    const { error } = await supabase.auth.signUp({
-      email: data.email,
-      password: data.password,
+    const { data, error } = await supabase.auth.signUp({
+      email: input.email,
+      password: input.password,
       options: {
-        data: { full_name: data.fullName },
+        data: { full_name: input.fullName },
       },
     })
 
@@ -79,10 +88,20 @@ export const signUp = createServerFn({ method: 'POST' })
       const message =
         error.code === 'user_already_exists'
           ? 'Email ini sudah terdaftar.'
-          : 'Pendaftaran gagal. Silakan coba lagi.'
+          : getEmailErrorMessage(error, 'Pendaftaran gagal. Silakan coba lagi.')
       return { success: false as const, message }
     }
-    return { success: true as const }
+
+    // When email confirmation is required, Supabase silently "succeeds" a signUp
+    // for an email that already belongs to an existing, unconfirmed account —
+    // returning a user with an empty identities array instead of an error (this
+    // avoids leaking which emails are registered).
+    if (data.user?.identities?.length === 0) {
+      return { success: false as const, message: 'Email ini sudah terdaftar.' }
+    }
+
+    // No session means the account needs email confirmation before it can log in.
+    return { success: true as const, needsConfirmation: !data.session }
   })
 
 export const signOut = createServerFn({ method: 'POST' }).handler(async () => {
@@ -101,7 +120,7 @@ export const sendPasswordResetEmail = createServerFn({ method: 'POST' })
     if (error) {
       return {
         success: false as const,
-        message: 'Gagal mengirim tautan reset. Silakan coba lagi.',
+        message: getEmailErrorMessage(error, 'Gagal mengirim tautan reset. Silakan coba lagi.'),
       }
     }
     return { success: true as const }
