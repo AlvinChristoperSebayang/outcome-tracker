@@ -91,6 +91,13 @@ export function currentMonthValue(): string {
   return format(new Date(), 'yyyy-MM')
 }
 
+/** "2026-09-01" (or "2026-09") -> "September 2026" */
+export function formatMonthLabel(monthOrDateOnly: string): string {
+  const monthValue = monthOrDateOnly.slice(0, 7)
+  const [year, month] = monthValue.split('-').map(Number)
+  return format(new Date(year, month - 1, 1), 'MMMM yyyy', { locale: id })
+}
+
 export const PERIOD_LABELS: Record<PeriodPreset, string> = {
   'hari-ini': 'Hari ini',
   'minggu-ini': 'Minggu ini',

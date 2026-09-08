@@ -71,6 +71,7 @@ async function createPocket(
     user_id: user.id,
     name: input.name,
     amount: resolvePocketAmount(input, Number(budget.income_amount)),
+    is_savings: input.isSavings,
   })
 
   if (error)
@@ -88,6 +89,7 @@ async function updatePocket(
     .update({
       name: input.name,
       amount: resolvePocketAmount(input, incomeAmount),
+      is_savings: input.isSavings,
     })
     .eq('id', id)
 
@@ -104,8 +106,10 @@ async function deletePocket(id: string): Promise<void> {
 
 function useInvalidateBudgetQueries(monthValue: string) {
   const queryClient = useQueryClient()
-  return () =>
+  return () => {
     queryClient.invalidateQueries({ queryKey: ['budget', monthValue] })
+    queryClient.invalidateQueries({ queryKey: ['savings'] })
+  }
 }
 
 export function useSetIncome(monthValue: string) {

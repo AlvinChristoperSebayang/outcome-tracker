@@ -400,3 +400,15 @@ Fitur ini melampaui batasan §4.2 (budgeting/income management awalnya dikecuali
 - Pembayaran cicilan **ikut terhitung** ke "Total Pengeluaran" & "Jumlah Transaksi" di Ringkasan/Laporan bulan pembayaran itu terjadi (sebagai kategori sintetis "Cicilan Hutang" khusus untuk breakdown — tidak menambah 9 kategori pengeluaran resmi, dan tidak muncul di tabel/list Pengeluaran biasa).
 
 **Skema tambahan:** `budgets` (1 per user per bulan), `budget_pockets`, `debts`, `debt_payments`, plus kolom `expenses.pocket_id` (nullable). Lihat [db/migrations/0002_budget_and_debt.sql](../db/migrations/0002_budget_and_debt.sql) — wajib dijalankan di Supabase SQL Editor sebelum fitur ini berfungsi.
+
+---
+
+## 17. Addendum — Tabungan & Wishlist
+
+Tab ketiga di halaman `/anggaran`, terhubung ke mekanisme kantong anggaran yang sudah ada.
+
+- **Kantong Tabungan**: kantong anggaran (di tab Kantong Anggaran maupun lewat tombol khusus di tab Tabungan) bisa ditandai sebagai "Kantong Tabungan" — jumlah/persentase dari pemasukan bulan itu yang dialokasikan ke sana **tidak** dipakai untuk pengeluaran (dikecualikan dari pilihan Kantong Anggaran saat Tambah Pengeluaran, tidak ada tracking terpakai/sisa).
+- **Total Tabungan**: akumulasi dari SEMUA kantong tabungan lintas bulan (bukan reset tiap bulan seperti kantong biasa) — mencerminkan "sisihkan gaji 5jt untuk menabung sekian tiap bulan, terus bertambah".
+- **Wishlist**: daftar barang yang diinginkan — nama, harga (opsional), link produk (opsional). Progress tiap item dibandingkan terhadap Total Tabungan (satu pool bersama, bukan dialokasikan per-item), dengan checkbox manual "sudah dibeli".
+
+**Skema tambahan:** kolom `budget_pockets.is_savings`, tabel baru `wishlist_items`. Lihat [db/migrations/0003_savings_and_wishlist.sql](../db/migrations/0003_savings_and_wishlist.sql) — wajib dijalankan di Supabase SQL Editor sebelum fitur ini berfungsi.

@@ -1,5 +1,6 @@
 /**
- * Hand-authored to match db/migrations/0001_init.sql and 0002_budget_and_debt.sql.
+ * Hand-authored to match db/migrations/0001_init.sql, 0002_budget_and_debt.sql,
+ * and 0003_savings_and_wishlist.sql.
  * Regenerate from the real project once Supabase is provisioned:
  *   npx supabase gen types typescript --project-id <id> > src/types/database.types.ts
  */
@@ -100,6 +101,7 @@ export interface Database {
           user_id: string
           name: string
           amount: number
+          is_savings: boolean
           created_at: string
           updated_at: string
         }
@@ -109,6 +111,7 @@ export interface Database {
           user_id: string
           name: string
           amount: number
+          is_savings?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -118,10 +121,19 @@ export interface Database {
           user_id?: string
           name?: string
           amount?: number
+          is_savings?: boolean
           created_at?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: 'budget_pockets_budget_id_fkey'
+            columns: ['budget_id']
+            isOneToOne: false
+            referencedRelation: 'budgets'
+            referencedColumns: ['id']
+          },
+        ]
       }
       debts: {
         Row: {
@@ -183,6 +195,39 @@ export interface Database {
           payment_date?: string
           notes?: string | null
           created_at?: string
+        }
+        Relationships: []
+      }
+      wishlist_items: {
+        Row: {
+          id: string
+          user_id: string
+          name: string
+          product_url: string | null
+          target_amount: number | null
+          is_achieved: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          name: string
+          product_url?: string | null
+          target_amount?: number | null
+          is_achieved?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          name?: string
+          product_url?: string | null
+          target_amount?: number | null
+          is_achieved?: boolean
+          created_at?: string
+          updated_at?: string
         }
         Relationships: []
       }

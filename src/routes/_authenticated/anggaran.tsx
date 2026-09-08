@@ -14,16 +14,23 @@ import { DebtList } from '#/components/debt/DebtList'
 import { DebtPaymentDialog } from '#/components/debt/DebtPaymentDialog'
 import { DeleteDebtDialog } from '#/components/debt/DeleteDebtDialog'
 import { MonthSelect } from '#/components/filters/MonthSelect'
+import { DeleteWishlistItemDialog } from '#/components/savings/DeleteWishlistItemDialog'
+import { TotalSavingsCard } from '#/components/savings/TotalSavingsCard'
+import { WishlistFormDialog } from '#/components/savings/WishlistFormDialog'
+import { WishlistList } from '#/components/savings/WishlistList'
 import { Button } from '#/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '#/components/ui/card'
 import { Skeleton } from '#/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '#/components/ui/tabs'
 import { monthlyBudgetQueryOptions } from '#/lib/queries/budgets'
 import { debtsQueryOptions } from '#/lib/queries/debts'
+import { savingsSummaryQueryOptions } from '#/lib/queries/savings'
+import { wishlistQueryOptions } from '#/lib/queries/wishlist'
 import { formatCurrency } from '#/lib/utils/currency'
 import { currentMonthValue } from '#/lib/utils/date'
 import type { BudgetPocketWithSpending } from '#/types/budget'
 import type { DebtWithProgress } from '#/types/debt'
+import type { WishlistItemRow } from '#/types/savings'
 
 export const Route = createFileRoute('/_authenticated/anggaran')({
   validateSearch: z.object({ bulan: z.string().optional() }),
@@ -43,10 +50,14 @@ function AnggaranPage() {
       <Tabs defaultValue="kantong">
         <TabsList>
           <TabsTrigger value="kantong">Kantong Anggaran</TabsTrigger>
+          <TabsTrigger value="tabungan">Tabungan</TabsTrigger>
           <TabsTrigger value="hutang">Hutang</TabsTrigger>
         </TabsList>
         <TabsContent value="kantong" className="mt-4">
           <BudgetPocketsTab />
+        </TabsContent>
+        <TabsContent value="tabungan" className="mt-4">
+          <SavingsTab />
         </TabsContent>
         <TabsContent value="hutang" className="mt-4">
           <DebtTab />
@@ -165,6 +176,103 @@ function BudgetPocketsTab() {
         pocket={deletingPocket}
         monthValue={monthValue}
         onOpenChange={(open) => !open && setDeletingPocket(null)}
+      />
+    </div>
+  )
+}
+
+function SavingsTab() {
+  const monthValue = currentMonthValue()
+
+  const [pocketFormOpen, setPocketFormOpen] = useState(false)
+  const [wishlistFormOpen, setWishlistFormOpen] = useState(false)
+  const [editingItem, setEditingItem] = useState<WishlistItemRow | undefined>(
+    undefined,
+  )
+  const [deletingItem, setDeletingItem] = useState<WishlistItemRow | null>(null)
+
+  const savingsQuery = useQuery(savingsSummaryQueryOptions())
+  const wishlistQuery = useQuery(wishlistQueryOptions())
+  const currentBudgetQuery = useQuery(monthlyBudgetQueryOptions(monthValue))
+  const incomeAmount = Number(
+    currentBudgetQuery.data?.budget?.income_amount ?? 0,
+  )
+
+  function openCreateWishlist() {
+    setEditingItem(undefined)
+    setWishlistFormOpen(true)
+  }
+
+  function openEditWishlist(item: WishlistItemRow) {
+    setEditingItem(item)
+    setWishlistFormOpen(true)
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-end">
+        <Button onClick={() => setPocketFormOpen(true)}>
+          <Plus className="h-4 w-4" />
+          Sisihkan Tabungan Bulan Ini
+        </Button>
+      </div>
+
+      {savingsQuery.isPending ? (
+        <Skeleton className="h-32 w-full rounded-xl" />
+      ) : savingsQuery.isError ? (
+        <ErrorState onRetry={() => savingsQuery.refetch()} />
+      ) : (
+        <TotalSavingsCard summary={savingsQuery.data} />
+      )}
+
+      <div>
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="text-base font-semibold">Wishlist</h2>
+          <Button variant="outline" size="sm" onClick={openCreateWishlist}>
+            <Plus className="h-4 w-4" />
+            Tambah Wishlist
+          </Button>
+        </div>
+
+        {wishlistQuery.isPending ? (
+          <div className="space-y-3">
+            <Skeleton className="h-20 w-full rounded-xl" />
+            <Skeleton className="h-20 w-full rounded-xl" />
+          </div>
+        ) : wishlistQuery.isError ? (
+          <ErrorState onRetry={() => wishlistQuery.refetch()} />
+        ) : wishlistQuery.data.length === 0 ? (
+          <EmptyState
+            title="Belum ada wishlist"
+            description="Catat barang yang ingin Anda beli dari tabungan, lengkap dengan link produk kalau ada."
+            actionLabel="Tambah Wishlist"
+            onAction={openCreateWishlist}
+          />
+        ) : (
+          <WishlistList
+            items={wishlistQuery.data}
+            totalSavings={savingsQuery.data?.total ?? 0}
+            onEdit={openEditWishlist}
+            onDelete={setDeletingItem}
+          />
+        )}
+      </div>
+
+      <PocketFormDialog
+        open={pocketFormOpen}
+        onOpenChange={setPocketFormOpen}
+        monthValue={monthValue}
+        incomeAmount={incomeAmount}
+        defaultIsSavings
+      />
+      <WishlistFormDialog
+        open={wishlistFormOpen}
+        onOpenChange={setWishlistFormOpen}
+        item={editingItem}
+      />
+      <DeleteWishlistItemDialog
+        item={deletingItem}
+        onOpenChange={(open) => !open && setDeletingItem(null)}
       />
     </div>
   )

@@ -17,6 +17,7 @@ export const pocketBaseSchema = z.object({
     .gt(0, 'Persentase harus lebih besar dari 0.')
     .max(100, 'Persentase maksimal 100.')
     .optional(),
+  isSavings: z.boolean(),
 })
 
 export const pocketSchema = pocketBaseSchema.refine(

@@ -13,6 +13,7 @@ import {
 } from '#/components/ui/dialog'
 import { Input } from '#/components/ui/input'
 import { Label } from '#/components/ui/label'
+import { Switch } from '#/components/ui/switch'
 import { Tabs, TabsList, TabsTrigger } from '#/components/ui/tabs'
 import { useCreatePocket, useUpdatePocket } from '#/lib/mutations/budgets'
 import {
@@ -29,12 +30,14 @@ export function PocketFormDialog({
   monthValue,
   incomeAmount,
   pocket,
+  defaultIsSavings = false,
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
   monthValue: string
   incomeAmount: number
   pocket?: BudgetPocketRow
+  defaultIsSavings?: boolean
 }) {
   const isEdit = Boolean(pocket)
   const createPocket = useCreatePocket(monthValue)
@@ -47,6 +50,7 @@ export function PocketFormDialog({
       allocationMode: 'amount' as 'amount' | 'percentage',
       amount: pocket ? Number(pocket.amount) : undefined,
       percentage: undefined as number | undefined,
+      isSavings: pocket?.is_savings ?? defaultIsSavings,
     },
     onSubmit: async ({ value }) => {
       if (value.allocationMode === 'amount' && !value.amount) {
@@ -88,21 +92,34 @@ export function PocketFormDialog({
         allocationMode: 'amount',
         amount: pocket ? Number(pocket.amount) : undefined,
         percentage: undefined,
+        isSavings: pocket?.is_savings ?? defaultIsSavings,
       })
     }
-  }, [open, pocket, form])
+  }, [open, pocket, form, defaultIsSavings])
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
-        <DialogHeader>
-          <DialogTitle>
-            {isEdit ? 'Ubah Kantong Anggaran' : 'Tambah Kantong Anggaran'}
-          </DialogTitle>
-          <DialogDescription>
-            Alokasikan sebagian anggaran bulan ini untuk kebutuhan tertentu.
-          </DialogDescription>
-        </DialogHeader>
+        <form.Subscribe selector={(state) => state.values.isSavings}>
+          {(isSavings) => (
+            <DialogHeader>
+              <DialogTitle>
+                {isEdit
+                  ? isSavings
+                    ? 'Ubah Kantong Tabungan'
+                    : 'Ubah Kantong Anggaran'
+                  : isSavings
+                    ? 'Tambah Kantong Tabungan'
+                    : 'Tambah Kantong Anggaran'}
+              </DialogTitle>
+              <DialogDescription>
+                {isSavings
+                  ? 'Sisihkan sebagian pemasukan bulan ini untuk ditabung — tidak dipakai untuk pengeluaran.'
+                  : 'Alokasikan sebagian anggaran bulan ini untuk kebutuhan tertentu.'}
+              </DialogDescription>
+            </DialogHeader>
+          )}
+        </form.Subscribe>
 
         <form
           className="space-y-4"
@@ -131,6 +148,24 @@ export function PocketFormDialog({
                   aria-invalid={field.state.meta.errors.length > 0}
                 />
                 <FieldError errors={field.state.meta.errors} />
+              </div>
+            )}
+          </form.Field>
+
+          <form.Field name="isSavings">
+            {(field) => (
+              <div className="flex items-center justify-between rounded-lg border border-border p-3">
+                <div className="space-y-0.5">
+                  <Label htmlFor={field.name}>Kantong Tabungan</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Uang disisihkan untuk ditabung, bukan untuk pengeluaran
+                  </p>
+                </div>
+                <Switch
+                  id={field.name}
+                  checked={field.state.value}
+                  onCheckedChange={(checked) => field.handleChange(checked)}
+                />
               </div>
             )}
           </form.Field>

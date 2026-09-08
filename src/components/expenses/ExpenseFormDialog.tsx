@@ -251,7 +251,9 @@ export function ExpenseFormDialog({
               const budgetQuery = useQuery(
                 monthlyBudgetQueryOptions(monthValue),
               )
-              const pockets = budgetQuery.data?.pockets ?? []
+              const pockets = (budgetQuery.data?.pockets ?? []).filter(
+                (pocket) => !pocket.is_savings,
+              )
 
               if (pockets.length === 0) return null
 
